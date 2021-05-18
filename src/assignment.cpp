@@ -1,5 +1,10 @@
 #include "MatrixExtra.h"
 
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wpass-failed"
+#endif
+
 static inline void insert_col_into_row
 (
     int *restrict indptr,
@@ -400,7 +405,9 @@ Rcpp::List set_single_row_to_zero
 
     const int nrows = indptr.size()-1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] -= n_this;
 
@@ -520,7 +527,9 @@ Rcpp::List set_single_row_to_const
 
     const int nrows = indptr.size()-1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] += diff;
 
@@ -656,7 +665,9 @@ Rcpp::List set_single_val_to_zero
 
     const int nrows = indptr.size()-1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] -= 1;
 
@@ -715,7 +726,9 @@ Rcpp::List set_single_val_to_const
 
     const int nrows = indptr.size()-1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] += 1;
 
@@ -801,7 +814,9 @@ Rcpp::List set_single_row_to_rowvec
 
     const int nrows = indptr.size() - 1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] += diff;
 
@@ -958,7 +973,9 @@ Rcpp::List set_single_row_to_svec
 
     const int nrows = indptr.size() - 1;
 
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set; row < nrows; row++)
         indptr_new[row+1] += diff;
 
@@ -966,7 +983,9 @@ Rcpp::List set_single_row_to_svec
     for (int repetition = 0; repetition < n_repeats; repetition++) {
         std::copy(ii.begin(), ii.end(), indices_new.begin() + indptr[row_set] + nnz*repetition);
         if (repetition > 0) {
+            #ifdef _OPENMP
             #pragma omp simd
+            #endif
             for (int ix = 0; ix < nnz; ix++)
                 indices_new[indptr[row_set] + nnz*repetition + ix] += length*repetition;
         }
@@ -1138,7 +1157,9 @@ Rcpp::List set_rowseq_to_zero
 
     std::copy(indptr.begin(), indptr.begin() + row_set_st + 1, indptr_new.begin());
     std::fill_n(indptr_new.begin() + row_set_st + 1, n_set, indptr[row_set_st]);
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int row = row_set_end; row < nrows; row++)
         indptr_new[row+1] = indptr[row+1] - diff;
 
@@ -2575,3 +2596,7 @@ Rcpp::List set_arbitrary_rows_to_smat
         Rcpp::_["values"] = values_new
     );
 }
+
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif

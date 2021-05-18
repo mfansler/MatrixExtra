@@ -1,5 +1,10 @@
 #include "MatrixExtra.h"
 
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wpass-failed"
+#endif
+
 /* Mental map to figure out what should be called where:
 
 matmul(x,y) -> x %*% y
@@ -42,7 +47,9 @@ The required functions are:
 static inline void saxpy1(const int n, const float a,
                           const float *restrict x, float *restrict y)
 {
+    #ifdef _OPENMP
     #pragma omp simd
+    #endif
     for (int ix = 0; ix < n; ix++) y[ix] += a * x[ix];
 }
 
@@ -76,9 +83,11 @@ void dgemm_csr_drm_as_drm
         return;
     const int one = 1;
     double *restrict row_ptr;
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(OutputMat, DenseMat, indptr, indices, values) \
             private(row_ptr)
+    #endif
     for (int row = 0; row < m; row++)
     {
         row_ptr = OutputMat + (size_t)row*ldc;
@@ -99,9 +108,11 @@ void dgemm_csr_drm_as_drm
     if (m <= 0 || indptr[0] == indptr[m])
         return;
     float *restrict row_ptr;
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(OutputMat, DenseMat, indptr, indices, values) \
             private(row_ptr)
+    #endif
     for (int row = 0; row < m; row++)
     {
         row_ptr = OutputMat + (size_t)row*ldc;
@@ -131,9 +142,11 @@ void dgemm_csr_drm_as_dcm
     double *restrict write_ptr;
     nthreads = std::min(nthreads, m);
     std::unique_ptr<double[]> temp_arr(new double[(size_t)ldc*(size_t)nthreads]);
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(OutputMat, DenseMat, indptr, indices, values) \
             private(write_ptr)
+    #endif
     for (int row = 0; row < m; row++)
     {
         if (indptr[row] < indptr[row+1])
@@ -162,9 +175,11 @@ void dgemm_csr_drm_as_dcm
     float *restrict write_ptr;
     nthreads = std::min(nthreads, m);
     std::unique_ptr<float[]> temp_arr(new float[(size_t)ldc*(size_t)nthreads]);
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(OutputMat, DenseMat, indptr, indices, values) \
             private(write_ptr)
+    #endif
     for (int row = 0; row < m; row++)
     {
         if (indptr[row] < indptr[row+1])
@@ -388,8 +403,10 @@ OutputVector matmul_csr_dvec(Rcpp::IntegerVector X_csr_indptr,
         out = (OutputDType*)REAL(out_);
     const int nrows = out_.size();
 
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(X_csr_indptr, X_csr_indices, X_csr_values, y_dense)
+    #endif
     for (int row = 0; row < nrows; row++)
         for (int ix = X_csr_indptr[row]; ix < X_csr_indptr[row+1]; ix++)
         {
@@ -489,10 +506,12 @@ Rcpp::NumericVector matmul_csr_svec(Rcpp::IntegerVector X_csr_indptr,
     int *restrict end_y = ptr_y_indices + y_indices_base1.size();
     int *ptr1, *ptr2, *end1;
 
+    #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic) num_threads(nthreads) \
             shared(X_csr_indptr, X_csr_indices, X_csr_values, \
                    ptr_X_indices, ptr_y_indices, end_y, out) \
             private(ptr1, ptr2, end1)
+    #endif
     for (int row = 0; row < nrows; row++)
     {
         ptr1 = ptr_X_indices + X_csr_indptr[row];
@@ -919,3 +938,7 @@ Rcpp::List matmul_spcolvec_by_scolvecascsr_binary
         y_length
     );
 }
+
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif

@@ -115,6 +115,11 @@ void process_i_arbitrary
     }
 }
 
+
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wpass-failed"
+#endif
 void post_process_seq
 (
     int *restrict ii_out, size_t n,
@@ -125,17 +130,24 @@ void post_process_seq
     if (!all_i)
     {
         if (i_is_seq) {
+            #ifdef _OPENMP
             #pragma omp simd
+            #endif
             for (size_t ix = 0; ix < n; ix++)
                 ii_out[ix] -= first_i;
         }
         else if (i_is_rev_seq) {
+            #ifdef _OPENMP
             #pragma omp simd
+            #endif
             for (size_t ix = 0; ix < n; ix++)
                 ii_out[ix] = first_i - ii_out[ix];
         }
     }
 }
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif
 
 template <class RcppVector, class InputDType, class CompileFlag>
 Rcpp::List slice_coo_arbitrary_template
@@ -763,9 +775,9 @@ Rcpp::List inject_NAs_inplace_coo_template
     std::unordered_set<int> cols_na(cols_na_.begin(), cols_na_.end());
 
     const int min_row = rows_na_.size()? rows_na_[0] : -1;;
-    const int max_row = rows_na_.size()? rows_na_[rows_na_.size()] : (nrows+1);
+    const int max_row = rows_na_.size()? rows_na_[rows_na_.size()-1] : (nrows+1);
     const int min_col = cols_na_.size()? cols_na_[0] : -1;;
-    const int max_col = cols_na_.size()? cols_na_[cols_na_.size()] : (ncols+1);
+    const int max_col = cols_na_.size()? cols_na_[cols_na_.size()-1] : (ncols+1);
 
     size_t curr = 0;
     const size_t nrows_ = nrows;
