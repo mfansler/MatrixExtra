@@ -1,4 +1,4 @@
-a7d4d47a2982505fe48cc28ab5b345a5 *DESCRIPTION
+ee313646e8901a349b639d171c41a1ae *DESCRIPTION
 efa613ccfd42ab224460b3160ab866c6 *NAMESPACE
 ae0860ce5ffe9fe1b8583c720398f533 *R/MatrixExtra.R
 107dacc2a605eb4e67d2649f2aeaba1a *R/RcppExports.R
@@ -16,10 +16,10 @@ cfe2e8b5cffd4d05eb61168b5b5fbdac *R/scalar_funs.R
 139c3792b71eaa5550b1111fc9873ba6 *R/utils.R
 ae5ade4f142e640b17de2fd2917ee353 *R/zzz.R
 ed7ca5ee1f011c291cd2de9d276dd4ae *build/vignette.rds
-11f1e873079827d967b1d43dbe672ca5 *configure
-855601cb64f5efa2f85b0ff9975f457b *configure.ac
+2b503e1b2b711cd3edcb2569e28b6905 *configure
+54adfff3bcfbd36bdaa29238e8821325 *configure.ac
 6eb359cd6e3c156311b56f22b9f9871d *configure.win
-632c1409048a0c9bb0fb849751cc8636 *inst/doc/Introducing_MatrixExtra.html
+d7733254d36d5b168081373fb59c307b *inst/doc/Introducing_MatrixExtra.html
 93b0ac9715de0748dec1df264259f1fe *man/MatrixExtra-options.Rd
 7216b180e699504f25eb792163233bc3 *man/MatrixExtra.Rd
 2aa90c23f0c62c1d031f4f0472dc7ea8 *man/assignment.Rd
@@ -62,5 +62,5 @@ a0c20f059bc69053f3e1c16d272e161a *tests/testthat/test-mat-by-svec.R
 a353156617de3a0f2b9fe776fbfb04d0 *tests/testthat/test-slice.R
 24d3be2f753dab94f247bc8fde2cd62e *tests/testthat/test-utilities.R
 8b536c14aa34aa3255562c586935a5b2 *vignettes/Introducing_MatrixExtra.R
-a29c7e4a1ea7ee2ea3a3359127cd575f *vignettes/Introducing_MatrixExtra.Rmd
-28b0295304056be8e99cd2015d4b81db *vignettes/Introducing_MatrixExtra.html
+eec0fd329d69e7db20bf21cd6608d2d6 *vignettes/Introducing_MatrixExtra.Rmd
+d7733254d36d5b168081373fb59c307b *vignettes/Introducing_MatrixExtra.html
