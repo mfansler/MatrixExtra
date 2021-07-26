@@ -1,11 +1,13 @@
 Package: MatrixExtra
 Type: Package
 Title: Extra Methods for Sparse Matrices
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: c(
   person(given="David", family="Cortes", role=c("aut", "cre", "cph"),
          email="david.cortes.rivera@gmail.com"),
-  person(given="Dmitry", family="Selivanov", role="cph")
+  person(given="Dmitry", family="Selivanov", role="cph"),
+  person(given="Thibaut", family="Goetghebuer-Planchon", role="cph",
+         comment="Copyright holder of included robinmap library")
   )
 Maintainer: David Cortes <david.cortes.rivera@gmail.com>
 Description: Extends sparse matrix and vector classes from the 'Matrix' package by providing: 
@@ -24,7 +26,7 @@ Description: Extends sparse matrix and vector classes from the 'Matrix' package 
 License: GPL (>= 2)
 Depends: Matrix (>= 1.3), methods
 Imports: Rcpp, RhpcBLASctl, float
-LinkingTo: Rcpp
+LinkingTo: Rcpp, float
 Suggests: testthat, data.table, knitr, rmarkdown
 VignetteBuilder: knitr
 URL: https://github.com/david-cortes/MatrixExtra
@@ -32,8 +34,11 @@ BugReports: https://github.com/david-cortes/MatrixExtra/issues
 RoxygenNote: 7.1.1
 NeedsCompilation: yes
 Biarch: TRUE
-Packaged: 2021-06-22 01:30:41 UTC; david
+StagedInstall: TRUE
+Packaged: 2021-07-26 16:20:30 UTC; david
 Author: David Cortes [aut, cre, cph],
-  Dmitry Selivanov [cph]
+  Dmitry Selivanov [cph],
+  Thibaut Goetghebuer-Planchon [cph] (Copyright holder of included
+    robinmap library)
 Repository: CRAN
-Date/Publication: 2021-06-22 05:10:10 UTC
+Date/Publication: 2021-07-26 18:10:06 UTC

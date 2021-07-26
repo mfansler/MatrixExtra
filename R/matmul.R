@@ -53,11 +53,20 @@
 #' on a default install of R for Windows (see
 #' \href{https://github.com/david-cortes/R-openblas-in-windows}{this link} for
 #' a tutorial about getting OpenBLAS in R for Windows).
-#' For the `float32` types, it doesn't use BLAS,
-#' but will rather ship with some BLAS replacements, which might run faster when compiling
-#' this library from source (`install.packages("MatrixExtra", type="source")`) rather
-#' than downloading a pre-compiled binary from CRAN (Windows and macOS), due to
-#' potentially using more advanced SIMD instructions from the CPU.
+#' 
+#' Doing computations in float32 precision depends on the package
+#' \href{https://cran.r-project.org/package=float}{float}, and as such comes
+#' with some caveats:\itemize{
+#' \item On Windows, if installing `float` from CRAN, it will use very unoptimized
+#' routines which will likely result in a slowdown compared to using regular
+#' double (numeric) type. Getting it to use an optimized BLAS library is not as
+#' simple as substituting the Rblas DLL - see the
+#' \href{https://github.com/wrathematics/float}{package's README} for details.
+#' \item On macOS, it will use static linking for `float`, thus if changing the BLAS
+#' library used by R, it will not change the float32 functions, and getting good
+#' performance out of it might require compiling it from source with `-march=native`
+#' flag.
+#' }
 #'
 #' When multiplying a sparse matrix by a sparse vector, their indices
 #' will be sorted in-place (see \link{sort_sparse_indices}).
@@ -192,6 +201,11 @@ setMethod("%*%", signature(x="matrix", y="CsparseMatrix"), gemm_dense_csc)
 
 gemm_f32_csc <- function(x, y) {
 
+    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
+    nthreads <- max(as.integer(nthreads), 1L)
+    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
+    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
+
     if (is.vector(x@Data)) {
 
         if (inherits(y, "symmetricMatrix") ||
@@ -247,12 +261,6 @@ gemm_f32_csc <- function(x, y) {
         }
     }
 
-    check_dimensions_match(x, y, matmult=TRUE)
-    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
-    nthreads <- max(as.integer(nthreads), 1L)
-    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
-    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
-
     y <- as.csc.matrix(y)
     check_valid_matrix(y)
 
@@ -299,6 +307,11 @@ tcrossprod_dense_csr <- function(x, y) {
 setMethod("tcrossprod", signature(x="matrix", y="RsparseMatrix"), tcrossprod_dense_csr)
 
 tcrossprod_f32_csr <- function(x, y) {
+
+    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
+    nthreads <- max(as.integer(nthreads), 1L)
+    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
+    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
 
     if (is.vector(x@Data)) {
 
@@ -353,12 +366,6 @@ tcrossprod_f32_csr <- function(x, y) {
         }
     }
 
-    check_dimensions_match(x, y, tcrossprod=TRUE)
-    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
-    nthreads <- max(as.integer(nthreads), 1L)
-    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
-    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
-
     y <- as.csr.matrix(y)
     check_valid_matrix(y)
 
@@ -386,6 +393,11 @@ crossprod_dense_csc <- function(x, y) {
 setMethod("crossprod", signature(x="matrix", y="CsparseMatrix"), crossprod_dense_csc)
 
 crossprod_f32_csc <- function(x, y) {
+
+    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
+    nthreads <- max(as.integer(nthreads), 1L)
+    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
+    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
 
     if (is.vector(x@Data)) {
         if (length(x@Data) != nrow(y))
@@ -457,6 +469,11 @@ gemm_csr_dense <- function(x, y) {
 setMethod("%*%", signature(x="RsparseMatrix", y="matrix"), gemm_csr_dense)
 
 gemm_csr_f32 <- function(x, y) {
+
+    nthreads <- getOption("MatrixExtra.nthreads", default=parallel::detectCores())
+    nthreads <- max(as.integer(nthreads), 1L)
+    on.exit(RhpcBLASctl::blas_set_num_threads(RhpcBLASctl::blas_get_num_procs()))
+    if (nthreads > 1) RhpcBLASctl::blas_set_num_threads(1L)
 
     if (is.vector(y@Data)) {
         if (ncol(x) == 1L) {
@@ -590,7 +607,7 @@ gemv_csr_vec <- function(x, y) {
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
                 nthreads
             )
@@ -599,7 +616,7 @@ gemv_csr_vec <- function(x, y) {
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
                 nthreads
             )
@@ -608,7 +625,7 @@ gemv_csr_vec <- function(x, y) {
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
                 nthreads
             )
@@ -617,7 +634,7 @@ gemv_csr_vec <- function(x, y) {
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 nthreads
             )
         } else {
@@ -660,35 +677,35 @@ outerprod_csrsinglecol_by_dvec <- function(x, y) {
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
-                y@length
+                as.integer(y@length)
             )
         } else if (inherits(y, "isparseVector")) {
             res <- matmul_spcolvec_by_scolvecascsr_integer(
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
-                y@length
+                as.integer(y@length)
             )
         } else if (inherits(y, "lsparseVector")) {
             res <- matmul_spcolvec_by_scolvecascsr_logical(
                 x@p,
                 x@j,
                 x@x,
-                y@i,
+                as.integer(y@i),
                 y@x,
-                y@length
+                as.integer(y@length)
             )
         } else if (inherits(y, "nsparseVector")) {
             res <- matmul_spcolvec_by_scolvecascsr_binary(
                 x@p,
                 x@j,
                 x@x,
-                y@i,
-                y@length
+                as.integer(y@i),
+                as.integer(y@length)
             )
         } else {
             y <- as(y, "dsparseVector")

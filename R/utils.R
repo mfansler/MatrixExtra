@@ -125,7 +125,7 @@ sort_sparse_indices <- function(X, copy=FALSE, byrow=TRUE) {
 
     } else if (inherits(X, "sparseVector")) {
         
-        if (copy) X@i <- deepcopy_int(X@i)
+        if (copy) X@i <- deepcopy_int(as.integer(X@i))
 
         if (inherits(X, "dsparseVector")) {
             if (copy) X@x <- deepcopy_num(X@x)
@@ -200,9 +200,15 @@ deepcopy_before_sort <- function(X, logical=FALSE, binary=FALSE) {
 #' @export
 deepcopy_sparse_object <- function(X) {
     if (inherits(X, "sparseVector")) {
-
-        X@i <- deepcopy_int(X@i)
-        X@length <- deepcopy_int(X@length)
+        
+        if (inherits(X@i, "integer"))
+            X@i <- deepcopy_int(X@i)
+        else
+            X@i <- deepcopy_num(X@i)
+        if (inherits(X@length, "integer"))
+            X@length <- deepcopy_int(X@length)
+        else
+            X@length <- deepcopy_num(X@length)
         if (inherits(X, "dsparseVector")) {
             X@x <- deepcopy_num(X@x)
         } else if (inherits(X, "isparseVector")) {
@@ -320,11 +326,11 @@ remove_sparse_zeros <- function(X, na.rm=FALSE) {
             return(X)
 
         if (inherits(X, "dsparseVector")) {
-            res <- remove_zero_valued_svec_numeric(X@i, X@x, na.rm)
+            res <- remove_zero_valued_svec_numeric(as.integer(X@i), X@x, na.rm)
         } else if (inherits(X, "isparseVector")) {
-            res <- remove_zero_valued_svec_integer(X@i, X@x, na.rm)
+            res <- remove_zero_valued_svec_integer(as.integer(X@i), X@x, na.rm)
         } else if (inherits(X, "lsparseVector")) {
-            res <- remove_zero_valued_svec_logical(X@i, X@x, na.rm)
+            res <- remove_zero_valued_svec_logical(as.integer(X@i), X@x, na.rm)
         } else {
             throw_internal_error()
         }
@@ -459,7 +465,7 @@ check_sparse_matrix <- function(X, sort=TRUE, remove_zeros=TRUE) {
                 stop("Vector indices and values have different length.")
         }
 
-        res <- check_valid_svec(X@i, X@length)
+        res <- check_valid_svec(as.integer(X@i), as.integer(X@length))
         
     } else {
         stop("Function is only applicable to sparse matrices and sparse vectors.")
@@ -525,4 +531,231 @@ reset_linked_to_indices <- function(indices) {
 can_modify_indices <- function(indices, vector=NULL) {
     stop("Not yet implemented.")
     return(TRUE)
+}
+
+#' @title Create Empty Sparse Matrix
+#' @description Creates an empty sparse matrix (all values being zeros)
+#' with the requested format and dimensions. This is a faster alternative
+#' to calling `Matrix::Matrix(0, ...)`.
+#' @param nrow Desired number of rows for the matrix.
+#' @param ncol Desired number of columns for the matrix.
+#' @param format Storage format for the matrix. Options are:\itemize{
+#' \item "R", which will output a CSR Matrix ("RsparseMatrix").
+#' \item "C", which will output a CSC Matrix ("CsparseMatrix").
+#' \item "T", which will output a COO/triplets Matrix ("TsparseMatrix").
+#' }
+#' @param dtype Data type for the matrix. Options are:\itemize{
+#' \item "d", which will output a numeric/double type (e.g. "dgRMatrix").
+#' \item "l", which will output a logical/boolean type.
+#' \item "n", which will output a binary type.
+#' }
+#' @return A sparse matrix of general type, with the specific class
+#' determined by `format` and `dtype`.
+#' @examples 
+#' ### This is very fast despite the large dimensions,
+#' ### as no data is held in the resulting object
+#' library(MatrixExtra)
+#' X <- emptySparse(nrow=2^20, ncol=2^25, format="T")
+#' @export
+emptySparse <- function(nrow=0L, ncol=0L, format="R", dtype="d") {
+    if (NROW(format) != 1L || !(format %in% c("R", "C", "T")))
+        stop("'format' must be one of 'R', 'C', 'T'.")
+    if (NROW(dtype) != 1L || !(dtype %in% c("d", "l", "n")))
+        stop("'dtype' must be one of 'd', 'l', 'n'.")
+    nrow <- as.integer(nrow)
+    ncol <- as.integer(ncol)
+    if (NROW(nrow) != 1L || is.na(nrow) || nrow < 0)
+        stop("'nrow' must be a non-negative integer.")
+    if (NROW(ncol) != 1L || is.na(ncol) || ncol < 0)
+        stop("'ncol' must be a non-negative integer.")
+    target_class <- sprintf("%sg%sMatrix", dtype, format)
+    out <- new(target_class)
+    out@Dim <- as.integer(c(nrow, ncol))
+    if (format == "R") {
+        out@p <- integer(nrow+1L)
+    } else if (format == "C") {
+        out@p <- integer(ncol+1L)
+    }
+    return(out)
+}
+
+#' @title Filter values of a sparse matrix or vector
+#' @description Filters the non-zero values of a sparse matrix or sparse
+#' vector object according to a user-provided function (e.g. to take only
+#' values above a certain threshold, or only greater than the mean), returning
+#' a sparse object with the same dimension as the input, but having only
+#' the non-zero values that meet the desired criteria.
+#' @param X A sparse matrix or sparse vector.
+#' @param fn A function taking as first argument a vector of non-zero values
+#' (which will be extracted from `X`) and returning a logical/boolean vector of
+#' the same length as the first argument, returning `TRUE` for values that are
+#' to be kept and `FALSE` for values that are to be discarded.
+#' 
+#' Alternatively, can pass a logical/boolean vector of the same length as `X@x`.
+#' 
+#' If any of the returned values is `NA`, will put a `NA` value at that position.
+#' @param ... Extra arguments to pass to `fn`.
+#' @returns A sparse matrix or sparse vector of the same class as `X` and with the
+#' same dimensions, but having only the non-zero values that meet the condition
+#' specificed by `fn`.
+#' @examples 
+#' library(Matrix)
+#' library(MatrixExtra)
+#' 
+#' ### Random sparse matrix
+#' set.seed(1)
+#' X <- rsparsematrix(nrow=20, ncol=10, density=0.3)
+#' 
+#' ### Take only values above 0.5
+#' X_filtered <- filterSparse(X, function(x) x >= 0.5)
+#' 
+#' ### Only elements with absolute values less than 0.3
+#' X_filtered <- filterSparse(X, function(x) abs(x) <= 0.3)
+#' 
+#' ### Only values above the mean (among non-zeros)
+#' X_filtered <- filterSparse(X, function(x) x > mean(x))
+#' @export
+filterSparse <- function(X, fn, ...) {
+    if (!inherits(X, c("sparseMatrix", "sparseVector")))
+        stop("Method is only applicable to sparse matrices and vectors.")
+    v_orig <- NULL
+    if (inherits(fn, "logical")) {
+        if (length(fn) != length(X@x))
+            stop(sprintf("'fn' has incorrect length (expected %d, got %d)",
+                         length(X@x), length(fn)))
+        v_orig <- fn
+        fn <- function(x, ...) v_orig
+    }
+    if (!inherits(fn, "function"))
+        stop("'fn' must be a function.")
+    if (!.hasSlot(X, "x"))
+        stop("Method is only applicable for sparse objects with values (slot 'x').")
+    
+    attr_X <- attributes(X)
+    if (inherits(X, "sparseVector")) {
+        
+        meets_cond <- fn(attr_X$x, ...)
+        if (!inherits(meets_cond, "logical"))
+            meets_cond <- as.logical(meets_cond)
+        attr_X$x <- attr_X$x[meets_cond]
+        attr_X$i <- attr_X$i[meets_cond | is.na(meets_cond)]
+
+    } else if (inherits(X, "TsparseMatrix")) {
+        
+        meets_cond <- fn(attr_X$x, ...)
+        if (!inherits(meets_cond, "logical"))
+            meets_cond <- as.logical(meets_cond)
+        attr_X$x <- attr_X$x[meets_cond]
+        meets_cond <- meets_cond | is.na(meets_cond)
+        attr_X$i <- attr_X$i[meets_cond]
+        attr_X$j <- attr_X$j[meets_cond]
+
+    } else if (inherits(X, "sparseMatrix")) {
+        
+        is_csr <- inherits(X, "RsparseMatrix")
+        is_csc <- inherits(X, "CsparseMatrix")
+        if (!is_csr && !is_csc)
+            stop("Invalid matrix type.")
+        meets_cond <- fn(attr_X$x, ...)
+        if (!inherits(meets_cond, "logical"))
+            meets_cond <- as.logical(meets_cond)
+        if (length(meets_cond) != length(attr_X$x))
+            stop(sprintf("'fn' returned incorrect number of entries (expected %d, got %d)",
+                         length(attr_X$x), length(meets_cond)))
+        attr_X$x <- attr_X$x[meets_cond]
+        meets_cond <- meets_cond | is.na(meets_cond)
+        if (is_csr)
+            attr_X$j <- attr_X$j[meets_cond]
+        else
+            attr_X$i <- attr_X$i[meets_cond]
+        attr_X$p <- rebuild_indptr_after_filter(attr_X$p, meets_cond)
+        
+    } else {
+        
+        stop("Unexpected error.")
+        
+    }
+    
+    attributes(X) <- attr_X
+    return(X)
+}
+
+#' @title Map values of a sparse matrix/vector
+#' @description Applies a function to the non-zero values of a sparse
+#' object, returning the transformed input with the new non-zero values.
+#' @param X A sparse matrix or sparse vector, whose non-zero values will
+#' be transformed/mapped according to `fn`.
+#' @param fn A function taking as first argument a vector of non-zero values
+#' (which will be extracted from `X`) and returning another vector of
+#' the same length as the first argument, which will become the non-zero values
+#' of the output.
+#' 
+#' Alternatively, can pass a vector of the same length as `X@x`.
+#' 
+#' If the results are of a different type than the input (e.g. input
+#' is `lsparseMatrix`, but `fn` returns a numeric vector), the type will
+#' be automatically converted to match the type returned by `fn`.
+#' @param ... Extra arguments to pass to `fn`.
+#' @returns A sparse object with the same storage order (T/C/R), dimension,
+#' and number of non-zero entries as `X`, but with its non-zero values substituted
+#' by the output from `fn`, and the exact class determined by the type returned
+#' by `fn`.
+#' @examples 
+#' library(Matrix)
+#' library(MatrixExtra)
+#' 
+#' set.seed(1)
+#' X <- rsparsematrix(10, 5, .5)
+#' mapSparse(X, function(x) abs(x)+1)
+#' @export
+mapSparse <- function(X, fn, ...) {
+    if (!inherits(X, c("sparseMatrix", "sparseVector")))
+        stop("Method is only applicable to sparse matrices and vectors.")
+    if (!.hasSlot(X, "x"))
+        stop("Method is only applicable for sparse objects with values (slot 'x').")
+    
+    attr_X <- attributes(X)
+    
+    v_orig <- NULL
+    if (inherits(fn, c("numeric", "integer", "logical"))) {
+        if (length(fn) != length(attr_X$x))
+            stop(sprintf("'fn' has incorrect length (expected %d, got %d)",
+                         length(attr_X$x), length(fn)))
+        fn <- function(x, ...) v_orig
+    }
+    if (!inherits(fn, "function"))
+        stop("'fn' must be a function.")
+    
+    mapped_x <- fn(attr_X$x, ...)
+    if (length(mapped_x) != length(attr_X$x))
+        stop(sprintf("'fn' returned incorrect number of entries (expected %d, got %d)",
+                     length(attr_X$x), length(mapped_x)))
+    
+    if (typeof(mapped_x) == typeof(attr_X$x)) {
+        attr_X$x <- mapped_x
+    } else {
+        if (inherits(mapped_x, "integer")) {
+            if (inherits(X, "isparseVector")) {
+                attr_X$x <- mapped_x
+            } else if (inherits(X, "sparseVector")) {
+                attr_X$class <- gsub("^\\wsparse", "isparse", attr_X$class, perl=TRUE)
+                attr_X$x <- mapped_x
+            } else {
+                mapped_x <- as.numeric(mapped_x)
+                attr_X$x <- mapped_x
+                attr_X$class <- gsub("^\\wsparse", "dsparse", attr_X$class, perl=TRUE)
+            }
+        } else if (inherits(mapped_x, "logical")) {
+            mapped_x <- as.logical(mapped_x)
+            attr_X$x <- mapped_x
+            attr_X$class <- gsub("^\\wsparse", "lsparse", attr_X$class, perl=TRUE)
+        } else {
+            mapped_x <- as.numeric(mapped_x)
+            attr_X$x <- mapped_x
+            attr_X$class <- gsub("^\\wsparse", "dsparse", attr_X$class, perl=TRUE)
+        }
+    }
+    
+    attributes(X) <- attr_X
+    return(X)
 }
