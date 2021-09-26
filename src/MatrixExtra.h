@@ -15,7 +15,7 @@
 #endif
 
 /* Aliasing for compiler optimizations */
-#if defined(__GNUG__) || defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+#if defined(__GNUG__) || defined(__GNUC__) || defined(__clang__) || defined(_MSC_VER) || defined(__INTEL_COMPILER) || defined(__IBMCPP__) || defined(__ibmxl__) || defined(SUPPORTS_RESTRICT)
     #define restrict __restrict
 #else
     #define restrict 
@@ -30,6 +30,7 @@
 extern "C" {
     #include <R.h>
     #include <Rinternals.h>
+    #include <R_ext/RS.h>
     #include <R_ext/BLAS.h>
 }
 

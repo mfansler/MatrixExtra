@@ -1,7 +1,7 @@
 Package: MatrixExtra
 Type: Package
 Title: Extra Methods for Sparse Matrices
-Version: 0.1.6
+Version: 0.1.7
 Authors@R: c(
   person(given="David", family="Cortes", role=c("aut", "cre", "cph"),
          email="david.cortes.rivera@gmail.com"),
@@ -35,10 +35,10 @@ RoxygenNote: 7.1.1
 NeedsCompilation: yes
 Biarch: TRUE
 StagedInstall: TRUE
-Packaged: 2021-07-26 16:20:30 UTC; david
+Packaged: 2021-09-26 01:24:41 UTC; david
 Author: David Cortes [aut, cre, cph],
   Dmitry Selivanov [cph],
   Thibaut Goetghebuer-Planchon [cph] (Copyright holder of included
     robinmap library)
 Repository: CRAN
-Date/Publication: 2021-07-26 18:10:06 UTC
+Date/Publication: 2021-09-26 04:30:05 UTC

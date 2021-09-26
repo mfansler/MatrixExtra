@@ -1,4 +1,4 @@
-3abb4889b4c94650ab234af71ccec7ca *DESCRIPTION
+f1f90c9d0ab3e89f84165045e3ab71a7 *DESCRIPTION
 38a9d9db8692d5e6d2a6d0944a89b611 *NAMESPACE
 b82e695f44aab3ecab71eaf434af836f *R/MatrixExtra.R
 c1a298a14a2c36725483de5276f1ae49 *R/RcppExports.R
@@ -16,8 +16,8 @@ cfe2e8b5cffd4d05eb61168b5b5fbdac *R/scalar_funs.R
 05cd1a778e166a668b73404a6074cf77 *R/utils.R
 65caf0574e2dbd0cc79f76366867c1dc *R/zzz.R
 ed7ca5ee1f011c291cd2de9d276dd4ae *build/vignette.rds
-8f7815de3540644376759aac92b615ad *configure
-4afe85f8d1e33af635b4e4a3f19d2501 *configure.ac
+52ef2ad78dd5ab2b6c8a21c9f1b7fc68 *configure
+7930962afd38658cc35602898aa49911 *configure.ac
 6eb359cd6e3c156311b56f22b9f9871d *configure.win
 816363a68436c66d71208e558cf002bf *inst/COPYRIGHTS
 d7733254d36d5b168081373fb59c307b *inst/doc/Introducing_MatrixExtra.html
@@ -41,13 +41,14 @@ fb496168cb62c35136792bc47db7ddb1 *man/mathematical-functions.Rd
 de9102ce4d881efbf13ced356e5e061a *man/slice.Rd
 37b97c9405e64e9ffb57f224d2685101 *man/sort_sparse_indices.Rd
 3426ead07982eb08533ead6768ec278f *man/t_shallow.Rd
-00ebe5c38da06da7b22d345d7a6faba6 *src/Makevars.in
+9b8d7065e85e3811b7d6c3d4e7916f1c *src/Makevars.in
 52e778f1521be1bb3a207b3948bf7cb1 *src/Makevars.win.in
-0003420081ca7e1621d02ed8a09f027b *src/MatrixExtra.h
-a38e6195d3e02c95bef0d4e02271e8d5 *src/RcppExports.cpp
+1375c0a2ab5d191efcc890080dd68a2d *src/MatrixExtra-win.def
+79de2eaab6298ca4fd39312dfaa04cae *src/MatrixExtra.h
+4ff04c832f3c0b27046b50bbaf1217c4 *src/RcppExports.cpp
 29c03e1cb86d9a6da208a28ab3e7a66d *src/assignment.cpp
 d440fb33411af32b4f5b43f5007fbc3b *src/cbind.cpp
-2683174e8adfe0832acbcd2342f0ec30 *src/matmul.cpp
+6d1c4fb18ff9b08c81bf2bd4816d3f71 *src/matmul.cpp
 c8321534a1523142b713aa51dc848366 *src/misc.cpp
 79a5d8288bf97a060728a15dbf44360d *src/operators.cpp
 261a09d4bfbdd23835ccb263aa8cfe78 *src/rbind.cpp
