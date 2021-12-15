@@ -1,7 +1,7 @@
 Package: MatrixExtra
 Type: Package
 Title: Extra Methods for Sparse Matrices
-Version: 0.1.8
+Version: 0.1.9
 Authors@R: c(
   person(given="David", family="Cortes", role=c("aut", "cre", "cph"),
          email="david.cortes.rivera@gmail.com"),
@@ -38,7 +38,7 @@ RoxygenNote: 7.1.2
 NeedsCompilation: yes
 Biarch: TRUE
 StagedInstall: TRUE
-Packaged: 2021-10-29 17:09:56 UTC; david
+Packaged: 2021-12-15 02:12:49 UTC; david
 Author: David Cortes [aut, cre, cph],
   Dmitry Selivanov [cph],
   Thibaut Goetghebuer-Planchon [cph] (Copyright holder of included
@@ -46,4 +46,4 @@ Author: David Cortes [aut, cre, cph],
   Martin Maechler [cph] (Copyright holder of 'Matrix' package from which
     some code was taken)
 Repository: CRAN
-Date/Publication: 2021-10-29 19:40:11 UTC
+Date/Publication: 2021-12-15 04:20:02 UTC
