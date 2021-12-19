@@ -1,4 +1,4 @@
-b65726a53a243a2fa66933233d48f4a0 *DESCRIPTION
+4ca1cb63ca83562b5887c3ee8ba1eda4 *DESCRIPTION
 b8225ca52164c95c9075bfa705a269d8 *NAMESPACE
 2aa8deb9e2bfef25dc366f8085f36fb5 *R/MatrixExtra.R
 6e19947261dd222061ac4e01947cf735 *R/RcppExports.R
@@ -50,7 +50,7 @@ de9102ce4d881efbf13ced356e5e061a *man/slice.Rd
 192005e1221059c0c6f6a644f9182b94 *src/RcppExports.cpp
 b923791a6627c6525b2bd6178fd4d813 *src/assignment.cpp
 d440fb33411af32b4f5b43f5007fbc3b *src/cbind.cpp
-173a393355dff0e8b967a49b0eb6e126 *src/matmul.cpp
+3fbf799998185f1fa02e5d5431ad1112 *src/matmul.cpp
 c8321534a1523142b713aa51dc848366 *src/misc.cpp
 79a5d8288bf97a060728a15dbf44360d *src/operators.cpp
 261a09d4bfbdd23835ccb263aa8cfe78 *src/rbind.cpp
