@@ -46,7 +46,7 @@ de9102ce4d881efbf13ced356e5e061a *man/slice.Rd
 4a3f7d3005c001d9f990675ac1e22d9c *src/Makevars.in
 8afa881b2524e5c1690c57b16d821058 *src/Makevars.win.in
 1375c0a2ab5d191efcc890080dd68a2d *src/MatrixExtra-win.def
-79de2eaab6298ca4fd39312dfaa04cae *src/MatrixExtra.h
+dfcfcf9b201a1b3f4cd87ad9a0a1ec3e *src/MatrixExtra.h
 192005e1221059c0c6f6a644f9182b94 *src/RcppExports.cpp
 b923791a6627c6525b2bd6178fd4d813 *src/assignment.cpp
 d440fb33411af32b4f5b43f5007fbc3b *src/cbind.cpp
