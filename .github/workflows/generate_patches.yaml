@@ -1,10 +1,10 @@
 name: generate patches
 
 on: 
-  workflow_dispatch
   push:
     branches:
       - patches
+      - patch-workflow
 
 jobs:
   patches:
