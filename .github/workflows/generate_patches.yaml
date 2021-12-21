@@ -1,0 +1,29 @@
+name: generate patches
+
+on: 
+  workflow_dispatch
+  push:
+    branches:
+      - patches
+
+jobs:
+  patches:
+    name: generate patches 
+    runs-on: ubuntu-latest
+        
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+        with:
+          branch: patches
+      
+      - name: generate patches
+        run: |
+          git format-patch -1 -o patches
+
+      - name: upload patches
+        uses: actions/upload-artifact@v2
+        with:
+          name: patches
+          path: |
+            patches/*.patch
