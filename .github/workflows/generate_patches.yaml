@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: patches
+          fetch-depth: 2
       
       - name: generate patches
         run: |
