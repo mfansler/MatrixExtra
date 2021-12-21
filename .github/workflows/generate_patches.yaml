@@ -15,7 +15,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v2
         with:
-          branch: patches
+          ref: patches
       
       - name: generate patches
         run: |
